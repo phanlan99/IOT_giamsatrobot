@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,19 +31,25 @@
         .header {
             background: linear-gradient(135deg, #2c3e50, #3498db);
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
+            display: grid;
+            height: auto;
+            grid-template-columns: 1fr;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            grid-column: 10;
+
         }
 
         .header p {
-            font-size: 1.2em;
+            font-size: 0.8em;
             opacity: 0.8;
+            font-weight: bold;
         }
 
         .main-content {
@@ -306,7 +313,7 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
+
             .control-section {
                 order: -1;
             }
@@ -316,15 +323,15 @@
             .button-group {
                 grid-template-columns: 1fr;
             }
-            
+
             .processing-controls {
                 grid-template-columns: 1fr;
             }
-            
+
             .header h1 {
                 font-size: 2em;
             }
-            
+
             .main-content {
                 padding: 20px;
             }
@@ -334,14 +341,16 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(255, 255, 255, .3);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .notification {
@@ -370,17 +379,31 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 Robot Arm Control System</h1>
-            <p>Real-time monitoring and control with YOLO object detection</p>
+            <div style="background-color: white; text-align: left; border-radius: 5px; margin-bottom: 20px;"><img
+                    style="background-color: white; padding: 2px; border-radius: 5px; margin-left: 10px; margin-top: 5px;"
+                    src="../img/logo.png" alt=""></div>
+            <div style="display: grid; grid-template-columns: 5fr 1fr;">
+                <div style=" display: flex; justify-content: center; align-items: center;  ">
+                    <h1 style="margin: 0;">Đồ án tốt nghiệp : Nghiên cứu và thiết kế bộ điều khiển thích nghi cho robot
+                        công nghiệp phân loại sản phẩm</h1>
+                </div>
+                <div>
+                    <p><span style=" font-size: 0.7em; text-decoration: underline; text-decoration-style: solid; color: rgb(206, 197, 228);">Giáo
+                            viên hướng dẫn</span><br>Trần Thị Minh Dung <br><br><span
+                            style="rgb(206, 197, 228); text-decoration: underline; text-decoration-style: solid; font-size: 0.7em;">Sinh
+                            viên thực hiện</span> <br> Trương Phan Lân <br>Nguyễn Đắc Quang <br>Đặng Minh Hưng</p>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
             <div class="video-section">
                 <h2 style="margin-bottom: 20px; color: #2c3e50;">📹 Live Camera Feed</h2>
-                
+
                 <div class="processing-controls">
                     <button class="btn btn-start" onclick="startProcessing()">
                         <span id="start-text">Start Processing</span>
@@ -487,7 +510,7 @@
         let statusUpdateInterval;
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateStatus();
             startStatusUpdates();
             setupVideoStream();
@@ -496,13 +519,13 @@
         function setupVideoStream() {
             const videoStream = document.getElementById('video-stream');
             const videoPlaceholder = document.getElementById('video-placeholder');
-            
-            videoStream.onload = function() {
+
+            videoStream.onload = function () {
                 videoPlaceholder.style.display = 'none';
                 videoStream.style.display = 'block';
             };
-            
-            videoStream.onerror = function() {
+
+            videoStream.onerror = function () {
                 videoPlaceholder.style.display = 'flex';
                 videoStream.style.display = 'none';
             };
@@ -513,7 +536,7 @@
             notification.textContent = message;
             notification.className = `notification ${type}`;
             notification.classList.add('show');
-            
+
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
@@ -523,15 +546,15 @@
             const startBtn = document.querySelector('.btn-start');
             const startText = document.getElementById('start-text');
             const startLoading = document.getElementById('start-loading');
-            
+
             startText.style.display = 'none';
             startLoading.style.display = 'inline-block';
             startBtn.disabled = true;
-            
+
             try {
                 const response = await fetch('/start_processing');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     isProcessing = true;
                     showNotification('Processing started successfully!', 'success');
@@ -542,7 +565,7 @@
             } catch (error) {
                 showNotification('Error starting processing', 'error');
             }
-            
+
             startText.style.display = 'inline';
             startLoading.style.display = 'none';
             startBtn.disabled = false;
@@ -552,15 +575,15 @@
             const stopBtn = document.querySelector('.btn-stop');
             const stopText = document.getElementById('stop-text');
             const stopLoading = document.getElementById('stop-loading');
-            
+
             stopText.style.display = 'none';
             stopLoading.style.display = 'inline-block';
             stopBtn.disabled = true;
-            
+
             try {
                 const response = await fetch('/stop_processing');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     isProcessing = false;
                     showNotification('Processing stopped', 'success');
@@ -570,7 +593,7 @@
             } catch (error) {
                 showNotification('Error stopping processing', 'error');
             }
-            
+
             stopText.style.display = 'inline';
             stopLoading.style.display = 'none';
             stopBtn.disabled = false;
@@ -581,7 +604,7 @@
             try {
                 const response = await fetch(`/connect_camera?camera_id=${cameraId}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification(`Camera ${cameraId} connected successfully!`, 'success');
                 } else {
@@ -597,7 +620,7 @@
             try {
                 const response = await fetch('/disconnect_camera');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification('Camera disconnected', 'success');
                 } else {
@@ -614,7 +637,7 @@
             try {
                 const response = await fetch(`/load_model?model_path=${encodeURIComponent(modelPath)}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification('YOLO model loaded successfully!', 'success');
                 } else {
@@ -630,7 +653,7 @@
             try {
                 const response = await fetch('/unload_model');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification('Model unloaded', 'success');
                 } else {
@@ -648,7 +671,7 @@
             try {
                 const response = await fetch(`/connect_serial?port=${port}&baudrate=${baudrate}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification(`Serial connected to ${port}`, 'success');
                 } else {
@@ -664,7 +687,7 @@
             try {
                 const response = await fetch('/disconnect_serial');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showNotification('Serial disconnected', 'success');
                 } else {
@@ -680,25 +703,25 @@
             try {
                 const response = await fetch('/status');
                 const data = await response.json();
-                
+
                 // Update status indicators
                 updateStatusIndicator('camera-indicator', data.camera_connected);
                 updateStatusIndicator('model-indicator', data.model_loaded);
                 updateStatusIndicator('serial-indicator', data.serial_connected);
-                
+
                 // Update status text
                 document.getElementById('camera-status').textContent = data.camera_connected ? 'Connected' : 'Disconnected';
                 document.getElementById('camera-status').className = data.camera_connected ? 'status-value active' : 'status-value';
-                
+
                 document.getElementById('model-status').textContent = data.model_loaded ? 'Loaded' : 'Not Loaded';
                 document.getElementById('model-status').className = data.model_loaded ? 'status-value active' : 'status-value';
-                
+
                 document.getElementById('serial-status').textContent = data.serial_connected ? 'Connected' : 'Disconnected';
                 document.getElementById('serial-status').className = data.serial_connected ? 'status-value active' : 'status-value';
-                
+
                 document.getElementById('processing-status').textContent = data.is_running ? 'Running' : 'Stopped';
                 document.getElementById('processing-status').className = data.is_running ? 'status-value active' : 'status-value';
-                
+
                 isProcessing = data.is_running;
             } catch (error) {
                 console.error('Error updating status:', error);
@@ -718,17 +741,17 @@
             try {
                 const response = await fetch('/logs');
                 const data = await response.json();
-                
+
                 const logsContainer = document.getElementById('logs-container');
                 logsContainer.innerHTML = '';
-                
+
                 data.logs.forEach(log => {
                     const logEntry = document.createElement('div');
                     logEntry.className = 'log-entry';
                     logEntry.textContent = log;
                     logsContainer.appendChild(logEntry);
                 });
-                
+
                 // Auto scroll to bottom
                 logsContainer.scrollTop = logsContainer.scrollHeight;
             } catch (error) {
@@ -744,11 +767,12 @@
         }
 
         // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             if (statusUpdateInterval) {
                 clearInterval(statusUpdateInterval);
             }
         });
     </script>
 </body>
+
 </html>
