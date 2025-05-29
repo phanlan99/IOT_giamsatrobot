@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Arm Control System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .header p {
+            color: #555;
+            margin: 5px 0;
+        }
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .camera-section, .control-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .camera-section {
+            width: 60%;
+        }
+        .control-section {
+            width: 35%;
+        }
+        .camera-section h2, .control-section h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .camera-feed img {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status, .control-group, .logs {
+            margin-bottom: 20px;
+        }
+        .status p, .logs p {
+            margin: 5px 0;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .control-group input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .logs {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .auth-links {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .auth-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-links">
+        {% if username %}
+            Welcome, {{ username }}! <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a> | <a href="/register">Register</a>
+        {% endif %}
+    </div>
+
+    <div class="header">
+        <h1>Đồ án tốt nghiệp: Nghiên cứu và thiết kế bộ điều khiển thích nghi cho robot công nghiệp phân loại sản phẩm</h1>
+        <p><strong>Giáo viên hướng dẫn:</strong> Trần Thị Minh Dung</p>
+        <p><strong>Sinh viên thực hiện:</strong> Trương Phan Lân, Nguyễn Đắc Quang, Đặng Minh Hưng</p>
+    </div>
+
+    <div class="main-content">
+        <div class="camera-section">
+            <h2>📹 Live Camera Feed</h2>
+            <div class="controls">
+                <button onclick="startProcessing()">Start Processing</button>
+                <button onclick="stopProcessing()">Stop Processing</button>
+            </div>
+            <div class="camera-feed">
+                <img src="{{ url_for('video_feed') }}" alt="Camera feed will appear here">
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="status">
+                <h2>📊 System Status</h2>
+                <p>Camera: <span id="camera-status">Disconnected</span></p>
+                <p>YOLO Model: <span id="model-status">Not Loaded</span></p>
+                <p>Serial: <span id="serial-status">Disconnected</span></p>
+                <p>Processing: <span id="processing-status">Stopped</span></p>
+            </div>
+
+            <div class="control-group">
+                <h2>📷 Camera Control</h2>
+                <label for="camera-id">Camera ID:</label>
+                <input type="number" id="camera-id" value="1">
+                <button onclick="connectCamera()">Connect</button>
+                <button onclick="disconnectCamera()">Disconnect</button>
+            </div>
+
+            <div class="control-group">
+                <h2>🧠 YOLO Model</h2>
+                <label for="model-path">Model Path:</label>
+                <input type="text" id="model-path" value="D:\muadoan\PBL6\PBL6\Code\Python\IOT\best.pt">
+                <button onclick="loadModel()">Load Model</button>
+                <button onclick="unloadModel()">Unload Model</button>
+            </div>
+
+            <div class="control-group">
+                <h2>🔗 Serial Connection</h2>
+                <label for="com-port">COM Port:</label>
+                <input type="text" id="com-port" value="COM5">
+                <label for="baud-rate">Baud Rate:</label>
+                <input type="number" id="baud-rate" value="9600">
+                <button onclick="connectSerial()">Connect</button>
+                <button onclick="disconnectSerial()">Disconnect</button>
+            </div>
+
+            <div class="logs">
+                <h2>📝 System Logs</h2>
+                <p id="log-messages">System initialized...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Placeholder for JavaScript functions (implement as needed)
+        function startProcessing() { fetch('/start_processing').then(updateStatus); }
+        function stopProcessing() { fetch('/stop_processing').then(updateStatus); }
+        function connectCamera() {
+            const id = document.getElementById('camera-id').value;
+            fetch(`/connect_camera?camera_id=${id}`).then(updateStatus);
+        }
+        function disconnectCamera() { fetch('/disconnect_camera').then(updateStatus); }
+        function loadModel() {
+            const path = document.getElementById('model-path').value;
+            fetch(`/load_model?model_path=${path}`).then(updateStatus);
+        }
+        function unloadModel() { fetch('/unload_model').then(updateStatus); }
+        function connectSerial() {
+            const port = document.getElementById('com-port').value;
+            const baud = document.getElementById('baud-rate').value;
+            fetch(`/connect_serial?port=${port}&baudrate=${baud}`).then(updateStatus);
+        }
+        function disconnectSerial() { fetch('/disconnect_serial').then(updateStatus); }
+        function updateStatus() {
+            fetch('/status').then(res => res.json()).then(data => {
+                document.getElementById('camera-status').textContent = data.camera_connected ? 'Connected' : 'Disconnected';
+                document.getElementById('model-status').textContent = data.model_loaded ? 'Loaded' : 'Not Loaded';
+                document.getElementById('serial-status').textContent = data.serial_connected ? 'Connected' : 'Disconnected';
+                document.getElementById('processing-status').textContent = data.is_running ? 'Running' : 'Stopped';
+            });
+            fetch('/logs').then(res => res.json()).then(data => {
+                document.getElementById('log-messages').textContent = data.logs.join('\n');
+            });
+        }
+        setInterval(updateStatus, 5000); // Update status every 5 seconds
+    </script>
+</body>
+</html>
