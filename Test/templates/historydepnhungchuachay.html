@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data History & Analytics - Robot Arm Control System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: grid;
+            height: auto;
+            grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 0.8em;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .data-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .data-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 0.9em;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .supplement-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .supplement-value.zero {
+            color: #95a5a6;
+        }
+
+        .supplement-value.positive {
+            color: #27ae60;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(52, 152, 219, .3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .dangnhap {
+            color: white;
+            text-decoration: none;
+            background-color: #3498db;
+            border-radius: 3px;
+            padding: 2px;
+            margin-left: 5px;
+        }
+
+        .dangnhap:hover {
+            text-decoration: underline;
+            background-color: #0a3f63;
+        }
+
+        .welcome-msg {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-controls {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .data-table {
+                font-size: 0.8em;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: grid; grid-template-columns: 1fr;">
+        <div style="margin-bottom: 5px; display: flex; text-align: right; justify-content: right; padding-right: 40px;">
+            {% if username %}
+            <span class="welcome-msg">Welcome, <span style="color: rgb(234, 46, 238);">{{ username }}!</span></span> 
+            <a href="/logout" class="dangnhap">Logout</a>
+            {% else %}
+            <a href="/login" class="dangnhap">Login</a> | <a href="/register" class="dangnhap">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div style="background-color: white; text-align: left; border-radius: 5px; margin-bottom: 20px;">
+                <img style="background-color: white; padding: 2px; border-radius: 5px; margin-left: 10px; margin-top: 5px;" src="../static/img/logo.png">
+            </div>
+            <h1>📊 Data History & Analytics</h1>
+            <p>View and analyze supplement detection data over time</p>
+        </div>
+
+        <div class="main-content">
+            <a href="/" class="btn btn-back">← Back to Control Panel</a>
+
+            <div class="filter-section">
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">🔍 Filter Data</h3>
+                <div class="filter-controls">
+                    <div class="input-group">
+                        <label for="start-date">Start Date:</label>
+                        <input type="text" id="start-date" placeholder="Select start date">
+                    </div>
+                    <div class="input-group">
+                        <label for="end-date">End Date:</label>
+                        <input type="text" id="end-date" placeholder="Select end date">
+                    </div>
+                    <button class="btn btn-primary" id="filter-data">
+                        <span id="filter-text">Filter</span>
+                        <div id="filter-loading" class="loading" style="display: none;"></div>
+                    </button>
+                    <button class="btn btn-secondary" id="clear-filter">Clear</button>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">📈 Summary Statistics</h3>
+                
+                <div class="stats-cards" id="stats">
+                    <div class="stat-card">
+                        <h3>Loading...</h3>
+                        <p>Statistics</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">📋 Detailed Records</h3>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Record Time</th>
+                                <th>Beroca</th>
+                                <th>Cachua</th>
+                                <th>Cam</th>
+                                <th>Egg</th>
+                                <th>Maleutyl</th>
+                                <th>Probio</th>
+                                <th>Sui</th>
+                                <th>Topralsin</th>
+                                <th>Vitatrum</th>
+                                <th>ZidocinDHG</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table">
+                            <tr>
+                                <td colspan="13" class="no-data">Loading data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="no-data-msg" class="no-data" style="display: none;">
+                    📭 No data found for the selected criteria
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Initialize Flatpickr for date inputs
+        flatpickr("#start-date", { dateFormat: "Y-m-d" });
+        flatpickr("#end-date", { dateFormat: "Y-m-d" });
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function fetchHistoryData(startDate, endDate) {
+            const filterText = document.getElementById('filter-text');
+            const filterLoading = document.getElementById('filter-loading');
+            
+            if (filterText && filterLoading) {
+                filterText.style.display = 'none';
+                filterLoading.style.display = 'inline-block';
+            }
+
+            $.ajax({
+                url: '/get_history',
+                method: 'GET',
+                data: { start_date: startDate, end_date: endDate },
+                success: function(response) {
+                    const tbody = $('#history-table');
+                    const statsDiv = $('#stats');
+                    tbody.empty();
+                    statsDiv.empty();
+
+                    if (response.data.length === 0) {
+                        tbody.append('<tr><td colspan="13" class="no-data">📭 No data found for the selected criteria</td></tr>');
+                        statsDiv.append(`
+                            <div class="stat-card">
+                                <h3>0</h3>
+                                <p>No Records Found</p>
+                            </div>
+                        `);
+                    } else {
+                        // Display data rows
+                        response.data.forEach(row => {
+                            const total = (row.beroca || 0) + (row.cachua || 0) + (row.cam || 0) + 
+                                        (row.egg || 0) + (row.maleutyl || 0) + (row.probio || 0) + 
+                                        (row.sui || 0) + (row.topralsin || 0) + (row.vitatrum || 0) + 
+                                        (row.zidocinDHG || 0);
+                            
+                            tbody.append(`
+                                <tr>
+                                    <td>${row.id}</td>
+                                    <td>${new Date(row.record_time).toLocaleString()}</td>
+                                    <td><span class="supplement-value ${(row.beroca || 0) > 0 ? 'positive' : 'zero'}">${row.beroca || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.cachua || 0) > 0 ? 'positive' : 'zero'}">${row.cachua || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.cam || 0) > 0 ? 'positive' : 'zero'}">${row.cam || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.egg || 0) > 0 ? 'positive' : 'zero'}">${row.egg || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.maleutyl || 0) > 0 ? 'positive' : 'zero'}">${row.maleutyl || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.probio || 0) > 0 ? 'positive' : 'zero'}">${row.probio || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.sui || 0) > 0 ? 'positive' : 'zero'}">${row.sui || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.topralsin || 0) > 0 ? 'positive' : 'zero'}">${row.topralsin || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.vitatrum || 0) > 0 ? 'positive' : 'zero'}">${row.vitatrum || 0}</span></td>
+                                    <td><span class="supplement-value ${(row.zidocinDHG || 0) > 0 ? 'positive' : 'zero'}">${row.zidocinDHG || 0}</span></td>
+                                    <td><strong>${total}</strong></td>
+                                </tr>
+                            `);
+                        });
+
+                        // Display statistics with beautiful cards
+                        let statsHTML = `
+                            <div class="stat-card">
+                                <h3>${response.stats.total_records}</h3>
+                                <p>Total Records</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>${response.stats.total_all}</h3>
+                                <p>Total Items</p>
+                            </div>
+                        `;
+
+                        // Add supplement-specific stats
+                        const supplements = ['beroca', 'cachua', 'cam', 'egg', 'maleutyl', 'probio', 'sui', 'topralsin', 'vitatrum', 'zidocinDHG'];
+                        const topSupplements = Object.entries(response.stats.total_counts)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 3);
+
+                        topSupplements.forEach(([name, count]) => {
+                            if (count > 0) {
+                                statsHTML += `
+                                    <div class="stat-card">
+                                        <h3>${count}</h3>
+                                        <p>${name.charAt(0).toUpperCase() + name.slice(1)}</p>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        statsDiv.html(statsHTML);
+                        showNotification('Data loaded successfully', 'success');
+                    }
+                },
+                error: function() {
+                    $('#history-table').html('<tr><td colspan="13" class="no-data">Error fetching data</td></tr>');
+                    $('#stats').html(`
+                        <div class="stat-card">
+                            <h3>Error</h3>
+                            <p>Loading Failed</p>
+                        </div>
+                    `);
+                    showNotification('Error loading data', 'error');
+                },
+                complete: function() {
+                    if (filterText && filterLoading) {
+                        filterText.style.display = 'inline';
+                        filterLoading.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            // Load initial data
+            fetchHistoryData();
+
+            // Filter button click event
+            $('#filter-data').click(function() {
+                const startDate = $('#start-date').val();
+                const endDate = $('#end-date').val();
+                fetchHistoryData(startDate, endDate);
+            });
+
+            // Clear filter button click event
+            $('#clear-filter').click(function() {
+                $('#start-date').val('');
+                $('#end-date').val('');
+                fetchHistoryData();
+                showNotification('Filter cleared', 'success');
+            });
+        });
+    </script>
+</body>
+
+</html>

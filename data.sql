@@ -8,3 +8,23 @@ CREATE TABLE users (
 ------thêm------
 INSERT INTO users (username, password)
 VALUES ('alice', 'hashed_password_123');
+
+--- phân loại ---
+
+CREATE TABLE supplement_data (
+    id SERIAL PRIMARY KEY,
+    record_time TIMESTAMP NOT NULL,
+    beroca INTEGER,
+    cachua INTEGER,
+    cam INTEGER,
+    egg INTEGER,
+    maleutyl INTEGER,
+    probio INTEGER,
+    sui INTEGER,
+    topralsin INTEGER,
+    vitatrum INTEGER,
+    zidocinDHG INTEGER
+);
+
+
+

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Control System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <header class="mb-4 flex justify-between items-center">
+            <div>
+                {% if username %}
+                Welcome, {{ username }}! <a href="/logout" class="text-blue-500 hover:underline">Logout</a>
+                {% else %}
+                <a href="/login" class="text-blue-500 hover:underline">Login</a> | <a href="/register" class="text-blue-500 hover:underline">Register</a>
+                {% endif %}
+            </div>
+            <a href="/history" class="text-blue-500 hover:underline">View History</a>
+        </header>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h1 class="text-2xl font-bold text-center mb-4">
+                Đồ án tốt nghiệp: Nghiên cứu và thiết kế bộ điều khiển thích nghi cho robot công nghiệp phân loại sản phẩm
+            </h1>
+            <div class="text-center">
+                <p><strong>Giáo viên hướng dẫn:</strong> Trần Thị Minh Dung</p>
+                <p><strong>Sinh viên thực hiện:</strong> Trương Phan Lân, Nguyễn Đắc Quang, Đặng Minh Hưng</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">📹 Live Camera Feed</h2>
+                <div class="mb-4">
+                    <button id="start-processing" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Start Processing</button>
+                    <button id="stop-processing" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Stop Processing</button>
+                </div>
+                <img id="video-feed" src="/video_feed" alt="Camera feed" class="w-full rounded-lg">
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">📊 System Status</h2>
+                    <p><strong>Camera:</strong> <span id="camera-status">Disconnected</span></p>
+                    <p><strong>YOLO Model:</strong> <span id="model-status">Not Loaded</span></p>
+                    <p><strong>Serial:</strong> <span id="serial-status">Disconnected</span></p>
+                    <p><strong>Processing:</strong> <span id="processing-status">Stopped</span></p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">📷 Camera Control</h2>
+                    <div class="mb-2">
+                        <label for="camera-id" class="block text-sm font-medium text-gray-700">Camera ID:</label>
+                        <input id="camera-id" type="number" value="1" class="border rounded p-2 w-full">
+                    </div>
+                    <button id="connect-camera" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Connect</button>
+                    <button id="disconnect-camera" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Disconnect</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">🧠 YOLO Model</h2>
+                    <div class="mb-2">
+                        <label for="model-path" class="block text-sm font-medium text-gray-700">Model Path:</label>
+                        <input id="model-path" type="text" value="D:\muadoan\PBL6\PBL6\Code\Python\IOT\best.pt" class="border rounded p-2 w-full">
+                    </div>
+                    <button id="load-model" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Load Model</button>
+                    <button id="unload-model" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Unload Model</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">🔗 Serial Connection</h2>
+                    <div class="mb-2">
+                        <label for="com-port" class="block text-sm font-medium text-gray-700">COM Port:</label>
+                        <input id="com-port" type="text" value="COM5" class="border rounded p-2 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="baud-rate" class="block text-sm font-medium text-gray-700">Baud Rate:</label>
+                        <input id="baud-rate" type="number" value="9600" class="border rounded p-2 w-full">
+                    </div>
+                    <button id="connect-serial" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Connect</button>
+                    <button id="disconnect-serial" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Disconnect</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">📝 System Logs</h2>
+                    <div id="logs" class="h-32 overflow-y-auto border p-2 rounded">
+                        <p>System initialized...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus() {
+            $.get('/status', function(data) {
+                $('#camera-status').text(data.camera_connected ? 'Connected' : 'Disconnected');
+                $('#model-status').text(data.model_loaded ? 'Loaded' : 'Not Loaded');
+                $('#serial-status').text(data.serial_connected ? 'Connected' : 'Disconnected');
+                $('#processing-status').text(data.is_running ? 'Running' : 'Stopped');
+            });
+        }
+
+        function updateLogs() {
+            $.get('/logs', function(data) {
+                $('#logs').empty();
+                data.logs.forEach(log => {
+                    $('#logs').append(`<p>${log}</p>`);
+                });
+            });
+        }
+
+        $(document).ready(function() {
+            updateStatus();
+            updateLogs();
+            setInterval(updateStatus, 5000);
+            setInterval(updateLogs, 5000);
+
+            $('#start-processing').click(function() {
+                $.get('/start_processing', function(data) {
+                    alert(data.message);
+                    updateStatus();
+                });
+            });
+
+            $('#stop-processing').click(function() {
+                $.get('/stop_processing', function(data) {
+                    alert(data.message);
+                    updateStatus();
+                });
+            });
+
+            $('#connect-camera').click(function() {
+                const cameraId = $('#camera-id').val();
+                $.get('/connect_camera', { camera_id: cameraId }, function(data) {
+                    alert(data.status === 'success' ? 'Camera connected' : 'Connection failed');
+                    updateStatus();
+                });
+            });
+
+            $('#disconnect-camera').click(function() {
+                $.get('/disconnect_camera', function(data) {
+                    alert(data.status === 'success' ? 'Camera disconnected' : 'Disconnection failed');
+                    updateStatus();
+                });
+            });
+
+            $('#load-model').click(function() {
+                const modelPath = $('#model-path').val();
+                $.get('/load_model', { model_path: modelPath }, function(data) {
+                    alert(data.status === 'success' ? 'Model loaded' : 'Loading failed');
+                    updateStatus();
+                });
+            });
+
+            $('#unload-model').click(function() {
+                $.get('/unload_model', function(data) {
+                    alert(data.status === 'success' ? 'Model unloaded' : 'Unloading failed');
+                    updateStatus();
+                });
+            });
+
+            $('#connect-serial').click(function() {
+                const port = $('#com-port').val();
+                const baudrate = $('#baud-rate').val();
+                $.get('/connect_serial', { port: port, baudrate: baudrate }, function(data) {
+                    alert(data.status === 'success' ? 'Serial connected' : 'Connection failed');
+                    updateStatus();
+                });
+            });
+
+            $('#disconnect-serial').click(function() {
+                $.get('/disconnect_serial', function(data) {
+                    alert(data.status === 'success' ? 'Serial disconnected' : 'Disconnection failed');
+                    updateStatus();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

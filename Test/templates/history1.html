@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data History & Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <header class="mb-4 flex justify-between items-center">
+            <div>
+                {% if username %}
+                Welcome, {{ username }}! <a href="/logout" class="text-blue-500 hover:underline">Logout</a>
+                {% else %}
+                <a href="/login" class="text-blue-500 hover:underline">Login</a> | <a href="/register" class="text-blue-500 hover:underline">Register</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h1 class="text-2xl font-bold mb-2">📊 Data History & Analytics</h1>
+            <p class="text-gray-600">View and analyze supplement detection data over time</p>
+        </div>
+
+        <a href="/" class="text-blue-500 hover:underline mb-4 inline-block">← Back to Control Panel</a>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔍 Filter Data</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="start-date" class="block text-sm font-medium text-gray-700">Start Date:</label>
+                    <input id="start-date" class="border rounded p-2 w-full" placeholder="Select start date">
+                </div>
+                <div>
+                    <label for="end-date" class="block text-sm font-medium text-gray-700">End Date:</label>
+                    <input id="end-date" class="border rounded p-2 w-full" placeholder="Select end date">
+                </div>
+                <div class="flex items-end">
+                    <button id="filter-data" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Filter</button>
+                    <button id="clear-filter" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">📈 Summary Statistics</h2>
+            <div id="stats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <p>Loading statistics...</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">📋 Detailed Records</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">ID</th>
+                            <th class="border p-2">Record Time</th>
+                            <th class="border p-2">Beroca</th>
+                            <th class="border p-2">Cachua</th>
+                            <th class="border p-2">Cam</th>
+                            <th class="border p-2">Egg</th>
+                            <th class="border p-2">Maleutyl</th>
+                            <th class="border p-2">Probio</th>
+                            <th class="border p-2">Sui</th>
+                            <th class="border p-2">Topralsin</th>
+                            <th class="border p-2">Vitatrum</th>
+                            <th class="border p-2">ZidocinDHG</th>
+                            <th class="border p-2">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table">
+                        <tr><td colspan="13" class="border p-2 text-center">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        flatpickr("#start-date", { dateFormat: "Y-m-d" });
+        flatpickr("#end-date", { dateFormat: "Y-m-d" });
+
+        function fetchHistoryData(startDate, endDate) {
+            $.ajax({
+                url: '/get_history',
+                method: 'GET',
+                data: { start_date: startDate, end_date: endDate },
+                success: function(response) {
+                    const tbody = $('#history-table');
+                    const statsDiv = $('#stats');
+                    tbody.empty();
+                    statsDiv.empty();
+
+                    if (response.data.length === 0) {
+                        tbody.append('<tr><td colspan="13" class="border p-2 text-center">📭 No data found for the selected criteria</td></tr>');
+                        statsDiv.append('<p>No statistics available</p>');
+                    } else {
+                        response.data.forEach(row => {
+                            const total = (row.beroca || 0) + (row.cachua || 0) + (row.cam || 0) + 
+                                        (row.egg || 0) + (row.maleutyl || 0) + (row.probio || 0) + 
+                                        (row.sui || 0) + (row.topralsin || 0) + (row.vitatrum || 0) + 
+                                        (row.zidocinDHG || 0);
+                            tbody.append(`
+                                <tr>
+                                    <td class="border p-2">${row.id}</td>
+                                    <td class="border p-2">${row.record_time}</td>
+                                    <td class="border p-2">${row.beroca || 0}</td>
+                                    <td class="border p-2">${row.cachua || 0}</td>
+                                    <td class="border p-2">${row.cam || 0}</td>
+                                    <td class="border p-2">${row.egg || 0}</td>
+                                    <td class="border p-2">${row.maleutyl || 0}</td>
+                                    <td class="border p-2">${row.probio || 0}</td>
+                                    <td class="border p-2">${row.sui || 0}</td>
+                                    <td class="border p-2">${row.topralsin || 0}</td>
+                                    <td class="border p-2">${row.vitatrum || 0}</td>
+                                    <td class="border p-2">${row.zidocinDHG || 0}</td>
+                                    <td class="border p-2">${total}</td>
+                                </tr>
+                            `);
+                        });
+
+                        statsDiv.append(`
+                            <div>
+                                <p><strong>Total Records:</strong> ${response.stats.total_records}</p>
+                                <p><strong>Total Items:</strong> ${response.stats.total_all}</p>
+                            </div>
+                            <div>
+                                ${Object.entries(response.stats.total_counts).map(([key, value]) => 
+                                    `<p><strong>${key}:</strong> ${value}</p>`).join('')}
+                            </div>
+                        `);
+                    }
+                },
+                error: function() {
+                    $('#history-table').html('<tr><td colspan="13" class="border p-2 text-center">Error fetching data</td></tr>');
+                    $('#stats').html('<p>Error loading statistics</p>');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            fetchHistoryData();
+
+            $('#filter-data').click(function() {
+                const startDate = $('#start-date').val();
+                const endDate = $('#end-date').val();
+                fetchHistoryData(startDate, endDate);
+            });
+
+            $('#clear-filter').click(function() {
+                $('#start-date').val('');
+                $('#end-date').val('');
+                fetchHistoryData();
+            });
+        });
+    </script>
+</body>
+</html>

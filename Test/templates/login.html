@@ -4,157 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 Robot Control - Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'gradient': 'gradient 15s ease infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { 
+                                opacity: '1',
+                                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)'
+                            },
+                            '50%': { 
+                                opacity: '0.8',
+                                boxShadow: '0 0 40px rgba(59, 130, 246, 0.6)'
+                            }
+                        }
+                    }
+                }
+            }
         }
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #555;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .password-container {
-            position: relative;
-        }
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .link {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        .link a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .link a:hover {
-            text-decoration: underline;
-        }
-        footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #777;
-        }
-        .alert-container {
-            margin: 10px auto;
-            max-width: 300px;
-            text-align: center;
-        }
-        .alert {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container">
-        <h1>🤖 Robot Control</h1>
-        <h2>Secure Access Portal</h2>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="alert-container">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <form action="/login" method="POST">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <div class="password-container">
-                    <input type="password" id="password" name="password" required>
-                    <span class="toggle-password">👁️</span>
-                </div>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-        
-        <div class="link">
-            Don't have an account? <a href="/register">Register here</a>
-        </div>
-    </div>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 animate-gradient flex items-center justify-center p-4">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent)] pointer-events-none"></div>
     
-    <footer>
-        Robot Arm Control System v1.0
-    </footer>
+    <!-- Floating Elements -->
+    <div class="absolute top-20 left-20 w-32 h-32 bg-blue-500/10 rounded-full blur-xl animate-float"></div>
+    <div class="absolute bottom-20 right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-xl animate-float" style="animation-delay: -3s;"></div>
+    <div class="absolute top-1/2 left-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl animate-float" style="animation-delay: -1.5s;"></div>
+
+    <div class="relative w-full max-w-md">
+        <!-- Main Container -->
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 animate-pulse-glow">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6 animate-float">
+                    <span class="text-3xl">🤖</span>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    Robot Control
+                </h1>
+                <p class="text-slate-300 text-sm font-medium">Secure Access Portal</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-6 space-y-2">
+                        {% for category, message in messages %}
+                            <div class="p-4 rounded-xl backdrop-blur-sm border {% if category == 'error' %}bg-red-500/20 border-red-400/30 text-red-200{% else %}bg-green-500/20 border-green-400/30 text-green-200{% endif %}">
+                                <div class="flex items-center space-x-2">
+                                    <span>{% if category == 'error' %}⚠️{% else %}✅{% endif %}</span>
+                                    <span class="text-sm font-medium">{{ message }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Login Form -->
+            <form action="/login" method="POST" class="space-y-6">
+                <!-- Username Field -->
+                <div class="space-y-2">
+                    <label for="username" class="block text-sm font-semibold text-slate-200">
+                        Username
+                    </label>
+                    <div class="relative group">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 backdrop-blur-sm"
+                            placeholder="Enter your username"
+                        >
+                        <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-semibold text-slate-200">
+                        Password
+                    </label>
+                    <div class="relative group">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required
+                            class="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 backdrop-blur-sm"
+                            placeholder="Enter your password"
+                        >
+                        <button 
+                            type="button" 
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors duration-200 focus:outline-none"
+                            onclick="togglePassword()"
+                        >
+                            <span id="toggle-icon">👁️</span>
+                        </button>
+                        <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 active:scale-95"
+                >
+                    <span class="flex items-center justify-center space-x-2">
+                        <span>Login</span>
+                        <span class="text-lg">🚀</span>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <div class="mt-8 text-center">
+                <p class="text-slate-300 text-sm">
+                    Don't have an account? 
+                    <a href="/register" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200 hover:underline ml-1">
+                        Register here
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+
+    </div>
 
     <script>
-        const togglePassword = document.querySelector('.toggle-password');
-        const passwordInput = document.querySelector('#password');
-        togglePassword.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? '👁️' : '🙈';
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggle-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️';
+            }
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add floating animation to robot icon on hover
+            const robotIcon = document.querySelector('.animate-float');
+            robotIcon.addEventListener('mouseenter', function() {
+                this.style.animationDuration = '1s';
+            });
+            robotIcon.addEventListener('mouseleave', function() {
+                this.style.animationDuration = '6s';
+            });
         });
     </script>
 </body>
