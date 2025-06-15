@@ -289,38 +289,54 @@ class RobotController:
                 if 0 <= cls < len(self.classNames):
                     currentClass = self.classNames[cls]
                     myColor = self.colors[cls]
-                    cv2.rectangle(undistorted_frame, (x1, y1), (x2, y2), myColor, 3)
-                    cv2.circle(undistorted_frame, (int(centerx), int(centery)), radius=3, color=(255, 255, 255), thickness=5)
-                    cvzone.putTextRect(undistorted_frame, f'{self.classNames[cls]} {conf}', (max(0, x1), max(35, y1)),
-                                    scale=1, thickness=1, colorB=myColor, colorT=(255, 255, 255), colorR=myColor)
-                    cv2.putText(undistorted_frame, f'{idx + 1}', (max(10, x1), max(0, y1 + 30)), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
-                                (255, 255, 255), 3)
-                    PC = np.array([[centimetx], [centimety], [-400], [1]])
-                    P0 = np.dot(self.HO_C, PC)
-                    x0 = round(P0[0, 0], 2)
-                    y0 = round(P0[1, 0], 2)
-                    z0 = round(P0[2, 0], 2)
-                    cvzone.putTextRect(undistorted_frame, f'Toado: x={x0:.2f}, y={y0:.2f}', (x2, y2), scale=1, thickness=1, colorR=myColor)
-                    if idx + 1 == 1 and centerx < 980:
-                        t1_inv, t2_inv, t3_inv, t4_inv, t5_inv, t6_inv = self.inverse_kinematics(x0, y0)
-                        t1_inv_rounded = round(t1_inv, 2)
-                        t2_inv_rounded = round(t2_inv, 2)
-                        t3_inv_rounded = round(t3_inv, 2)
-                        t4_inv_rounded = round(t4_inv, 2)
-                        t5_inv_rounded = round(t5_inv, 2)
-                        t6_inv_rounded = round(t6_inv, 2)
-                        data = f'Start,{currentClass},{t1_inv_rounded},{t2_inv_rounded},{t3_inv_rounded},{t4_inv_rounded},{t5_inv_rounded},{t6_inv_rounded},{x0},{y0},{z0},\n'
-                        self.transmit_data(data)
-                        if self.serial_connected and self.serial_connection:
-                            try:
-                                response = self.serial_connection.readline().strip()
-                                if response == b'Done':
-                                    self.a = 1
-                                    self.log_message("Received 'Done' from Arduino")
-                            except:
-                                pass
-            label = f'Seed Count: {num_seeds}'
-            cvzone.putTextRect(undistorted_frame, label, (10, 710), scale=1, thickness=1, colorR=(0, 0, 255))
+                else:
+                    self.log_message(f"Warning: Invalid class index {cls}")
+                    continue
+                cv2.rectangle(undistorted_frame, (x1, y1), (x2, y2), myColor, 3)
+                cv2.circle(undistorted_frame, (int(centerx), int(centery)), radius=3, color=(255, 255, 255), thickness=5)
+                cvzone.putTextRect(undistorted_frame, f'{self.classNames[cls]} {conf}', (max(0, x1), max(35, y1)),
+                                   scale=1, thickness=2, colorB=myColor, colorT=(255, 255, 255), colorR=myColor)
+                cv2.putText(undistorted_frame, f'{idx + 1}', (max(10, x1), max(0, y1 + 30)), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                            (255, 255, 255), 2)
+                PC = np.array([[centimetx], [centimety], [-400], [1]])
+                P0 = np.dot(self.HO_C, PC)
+                x0 = round(P0[0, 0], 2)
+                y0 = round(P0[1, 0], 2)
+                z0 = round(P0[2, 0], 2)
+                cvzone.putTextRect(undistorted_frame, f'Toado: x={x0:.2f}, y={y0:.2f}', (x2, y2), scale=1, thickness=1, colorR=myColor)
+                if idx == 0 and centerx < 980 and self.a == 1:  # Chỉ xử lý vật gần nhất
+                    if self.serial_connected and self.serial_connection:
+                        self.serial_connection.write(b"Stop conveyor\n")
+                        time.sleep(0.1)
+                    t1_inv, t2_inv, t3_inv, t4_inv, t5_inv, t6_inv = self.inverse_kinematics(x0, y0)
+                    t1_inv_rounded = round(t1_inv, 1)
+                    t2_inv_rounded = round(t2_inv, 1)
+                    t3_inv_rounded = round(t3_inv, 1)
+                    t4_inv_rounded = round(t4_inv, 1)
+                    t5_inv_rounded = round(t5_inv, 1)
+                    t6_inv_rounded = round(t6_inv, 1)
+                    data = f"Start,{currentClass},{t1_inv_rounded},{t2_inv_rounded},{t3_inv_rounded},{t4_inv_rounded},{t5_inv_rounded},{t6_inv_rounded},{x0},{y0},{z0},\n"
+                    self.transmit_data(data)
+            label = f'Symbol Count: {num_seeds}'
+            cvzone.putTextRect(undistorted_frame, label, (10, 710), scale=2, thickness=2, colorR=(255, 0, 0))
+            if self.serial_connected and self.serial_connection:
+                try:
+                    response = self.serial_connection.readline().decode().strip()
+                    if response == "Done":
+                        self.a = 1
+                        self.log_message("Received 'Done'")
+                        if num_seeds > 1 or any(box[1].xyxy[0][0] < 980 for box in bounding_boxes):
+                            self.serial_connection.write(b"Stop conveyor\n")
+                            self.log_message("Sent stop command due to remaining objects")
+                        else:
+                            self.serial_connection.write(b"Start conveyor\n")
+                            self.log_message("Sent start conveyor command")
+                    elif response == "Conveyor stopped":
+                        self.log_message("Conveyor stopped")
+                    elif response == "Conveyor started":
+                        self.log_message("Conveyor started")
+                except:
+                    pass
         self.current_frame = undistorted_frame
         return undistorted_frame
 
@@ -444,7 +460,6 @@ def get_history():
                 query += " ORDER BY record_time DESC LIMIT 100"
                 cur.execute(query, params)
                 data = cur.fetchall()
-                # Calculate statistics
                 if data:
                     stats = {
                         'total_records': len(data),
@@ -491,7 +506,7 @@ def stop_processing():
 def connect_camera():
     camera_id = request.args.get('camera_id', 1, type=int)
     success = robot_controller.connect_camera(camera_id)
-    return jsonify({'status': 'success' if success else 'error', 
+    return jsonify({'status': 'success' if success else 'error',
                     'connected': robot_controller.camera_connected})
 
 @app.route('/disconnect_camera')

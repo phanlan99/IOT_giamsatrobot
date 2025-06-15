@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplement Detection Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #764ba2 100%);
+            min-height: 100vh;
+            animation: gradientShift 10s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #764ba2 100%); }
+            50% { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card-solid {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .icon-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-wrapper {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .title-glow {
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="container mx-auto p-6 max-w-7xl">
+        <!-- Header với thiết kế sang trọng -->
+        <header class="glass-card rounded-3xl p-8 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full opacity-20 transform translate-x-16 -translate-y-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400 to-cyan-400 rounded-full opacity-20 transform -translate-x-12 translate-y-12"></div>
+            
+            <div class="flex flex-col lg:flex-row items-center justify-between relative z-10">
+                <div class="flex items-center mb-4 lg:mb-0">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-4 rounded-2xl mr-4 icon-float">
+                        <span class="text-4xl">💊</span>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl lg:text-5xl font-bold text-white title-glow mb-2">
+                            Supplement Analytics
+                        </h1>
+                        <p class="text-xl text-blue-100">Advanced Detection Dashboard</p>
+                    </div>
+                </div>
+                
+                <div class="text-center lg:text-right">
+                    {% if username %}
+                        <div class="bg-white bg-opacity-20 rounded-2xl p-4 backdrop-blur-sm">
+                            <p class="text-white font-medium mb-2">👋 Welcome back,</p>
+                            <p class="text-2xl font-bold text-yellow-300">{{ username }}</p>
+                            <a href="{{ url_for('logout') }}" class="text-red-300 hover:text-red-100 transition-colors duration-300 mt-2 inline-block">
+                                🚪 Sign Out
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="space-x-4">
+                            <a href="{{ url_for('login') }}" class="nav-link text-blue-200 hover:text-white px-4 py-2">
+                                🔐 Login
+                            </a>
+                            <a href="{{ url_for('register') }}" class="nav-link text-green-200 hover:text-white px-4 py-2">
+                                ✨ Register
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Menu -->
+        <nav class="flex flex-wrap gap-4 mb-8">
+            <a href="{{ url_for('index') }}" 
+               class="btn-gradient text-white px-8 py-4 rounded-2xl font-medium shadow-lg flex items-center space-x-3 min-w-fit">
+                <span class="text-2xl">🏠</span>
+                <span>Home Dashboard</span>
+            </a>
+            <a href="{{ url_for('history') }}" 
+               class="btn-gradient text-white px-8 py-4 rounded-2xl font-medium shadow-lg flex items-center space-x-3 min-w-fit">
+                <span class="text-2xl">📊</span>
+                <span>Analysis History</span>
+            </a>
+        </nav>
+
+        <!-- Date Selection Section -->
+        <section class="glass-card-solid rounded-3xl p-8 mb-8">
+            <div class="flex items-center mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 p-3 rounded-xl mr-4">
+                    <span class="text-3xl">🔍</span>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">Date Selection</h2>
+                    <p class="text-gray-600 text-lg">Choose a specific date to analyze supplement detection data</p>
+                </div>
+            </div>
+            
+            <form action="{{ url_for('phantich') }}" method="POST" class="flex flex-col lg:flex-row items-center gap-6">
+                <div class="flex-1 max-w-md">
+                    <label class="block text-gray-700 font-medium mb-2">Analysis Date</label>
+                    <input type="date" 
+                           name="analysis_date" 
+                           value="{{ selected_date or '' }}" 
+                           class="w-full border-2 border-gray-300 rounded-xl p-4 text-lg focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all duration-300 bg-white shadow-inner">
+                </div>
+                <div class="lg:mt-8">
+                    <button type="submit" 
+                            class="btn-gradient text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg flex items-center space-x-3">
+                        <span class="text-2xl">🚀</span>
+                        <span>Generate Analysis</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-200 font-medium">Total Detections</p>
+                        <p class="text-3xl font-bold text-white" id="totalCount">0</p>
+                    </div>
+                    <div class="text-4xl">📈</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-200 font-medium">Top Supplement</p>
+                        <p class="text-xl font-bold text-white" id="mostDetected">-</p>
+                    </div>
+                    <div class="text-4xl">🏆</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-200 font-medium">Active Types</p>
+                        <p class="text-3xl font-bold text-white" id="activeTypes">0</p>
+                    </div>
+                    <div class="text-4xl">🎯</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-yellow-200 font-medium">Coverage</p>
+                        <p class="text-2xl font-bold text-white" id="coverage">0%</p>
+                    </div>
+                    <div class="text-4xl">📊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chart Section -->
+        <section class="glass-card-solid rounded-3xl p-8">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8">
+                <div class="flex items-center mb-4 lg:mb-0">
+                    <div class="bg-gradient-to-br from-orange-500 to-red-500 p-3 rounded-xl mr-4">
+                        <span class="text-3xl">📊</span>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">
+                            Supplement Distribution Analysis
+                        </h2>
+                        <p class="text-gray-600 text-lg">
+                            Data for: <span class="font-bold text-purple-600">
+                                {% if selected_date %}{{ selected_date }}{% else %}Please select a date{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-4">
+                    <p class="text-sm text-gray-600 mb-1">Chart Mode</p>
+                    <p class="font-bold text-gray-800">Interactive Bar Chart</p>
+                </div>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="supplementChart" style="max-height: 500px;"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const data = {{ data | tojson }};
+            const labels = ['Beroca', 'Cachua', 'Cam', 'Egg', 'Maleutyl', 'Probio', 'Sui', 'Topralsin', 'Vitatrum', 'ZidocinDHG'];
+            
+            // Tính toán số lượng cho mỗi supplement
+            const counts = labels.map(label => {
+                return data.reduce((sum, row) => sum + (row[label.toLowerCase()] || 0), 0);
+            });
+
+            // Màu sắc gradient đẹp cho từng cột
+            const gradientColors = [
+                { bg: 'rgba(255, 99, 132, 0.8)', border: 'rgba(255, 99, 132, 1)' },      // Đỏ hồng
+                { bg: 'rgba(54, 162, 235, 0.8)', border: 'rgba(54, 162, 235, 1)' },     // Xanh dương
+                { bg: 'rgba(255, 206, 84, 0.8)', border: 'rgba(255, 206, 84, 1)' },     // Vàng cam
+                { bg: 'rgba(75, 192, 192, 0.8)', border: 'rgba(75, 192, 192, 1)' },     // Xanh ngọc
+                { bg: 'rgba(153, 102, 255, 0.8)', border: 'rgba(153, 102, 255, 1)' },   // Tím
+                { bg: 'rgba(255, 159, 64, 0.8)', border: 'rgba(255, 159, 64, 1)' },     // Cam
+                { bg: 'rgba(199, 199, 199, 0.8)', border: 'rgba(199, 199, 199, 1)' },   // Xám
+                { bg: 'rgba(83, 102, 255, 0.8)', border: 'rgba(83, 102, 255, 1)' },     // Xanh indigo
+                { bg: 'rgba(255, 99, 255, 0.8)', border: 'rgba(255, 99, 255, 1)' },     // Hồng tím
+                { bg: 'rgba(99, 255, 132, 0.8)', border: 'rgba(99, 255, 132, 1)' }      // Xanh lá
+            ];
+
+            // Cập nhật thống kê
+            const totalCount = counts.reduce((sum, count) => sum + count, 0);
+            const maxCount = Math.max(...counts);
+            const maxIndex = counts.indexOf(maxCount);
+            const mostDetected = maxCount > 0 ? labels[maxIndex] : 'None';
+            const activeTypes = counts.filter(count => count > 0).length;
+            const coverage = labels.length > 0 ? Math.round((activeTypes / labels.length) * 100) : 0;
+
+            // Hiển thị thống kê với animation
+            setTimeout(() => {
+                document.getElementById('totalCount').textContent = totalCount.toLocaleString();
+                document.getElementById('mostDetected').textContent = mostDetected;
+                document.getElementById('activeTypes').textContent = activeTypes;
+                document.getElementById('coverage').textContent = coverage + '%';
+            }, 500);
+
+            // Tạo biểu đồ
+            const ctx = document.getElementById('supplementChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Detection Count',
+                        data: counts,
+                        backgroundColor: gradientColors.map(color => color.bg),
+                        borderColor: gradientColors.map(color => color.border),
+                        borderWidth: 3,
+                        borderRadius: {
+                            topLeft: 12,
+                            topRight: 12,
+                            bottomLeft: 4,
+                            bottomRight: 4
+                        },
+                        borderSkipped: false,
+                        barThickness: 'flex',
+                        maxBarThickness: 80
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                padding: 25,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                color: '#374151'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#F9FAFB',
+                            bodyColor: '#F9FAFB',
+                            borderColor: 'rgba(139, 92, 246, 0.5)',
+                            borderWidth: 2,
+                            cornerRadius: 12,
+                            displayColors: true,
+                            titleFont: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            padding: 15,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Detections: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Detections',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                color: '#374151'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                drawBorder: false,
+                                lineWidth: 1
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                color: '#6B7280',
+                                padding: 10
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Supplement Types',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                color: '#374151'
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                },
+                                color: '#6B7280',
+                                maxRotation: 45,
+                                minRotation: 0,
+                                padding: 10
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2500,
+                        easing: 'easeInOutQuart'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

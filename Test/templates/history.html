@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,34 +24,60 @@
     </script>
     <style>
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         @keyframes bounceSubtle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
         }
+
         .glass-effect {
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
         .card-hover {
             transition: all 0.3s ease;
         }
+
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
+
 <body class="gradient-bg min-h-screen">
     <div class="container mx-auto p-4 max-w-7xl">
         <!-- Header with glass effect -->
@@ -67,55 +94,97 @@
                 </div>
                 <div class="text-white">
                     {% if username %}
-                        <div class="flex items-center space-x-4">
-                            <span class="bg-white/20 px-4 py-2 rounded-full">Welcome, {{ username }}!</span>
-                            <a href="/logout" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full transition-colors">Logout</a>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-white/20 px-4 py-2 rounded-full">Welcome, {{ username }}!</span>
+                        <a href="/logout"
+                            class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full transition-colors">Logout</a>
+                    </div>
                     {% else %}
-                        <div class="space-x-4">
-                            <a href="/login" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full transition-colors">Login</a>
-                            <a href="/register" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition-colors">Register</a>
-                        </div>
+                    <div class="space-x-4">
+                        <a href="/login"
+                            class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full transition-colors">Login</a>
+                        <a href="/register"
+                            class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition-colors">Register</a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </header>
 
         <!-- Navigation -->
-        <div class="mb-6 animate-slide-up">
-            <a href="/" class="inline-flex items-center space-x-2 bg-white/20 text-white px-4 py-2 rounded-full hover:bg-white/30 transition-colors">
-                <span>←</span>
-                <span>Back to Control Panel</span>
+        <!-- <div style="display: grid; grid-template-columns: 1fr 3fr;" class="mb-6 animate-slide-up">
+            <div>
+                <a href="/"
+                    class="inline-flex items-center space-x-2 bg-white/20 text-white px-4 py-2 rounded-full hover:bg-white/30 transition-colors">
+                    <span>←</span>
+                    <span>Back to Control Panel</span>
+                </a>
+            </div>
+            <div>
+                <div class="mt-4">
+                    <label for="analysis_date" class="block text-gray-700">Analyze Specific Date</label>
+                    <div class="flex items-center">
+                        <input type="date" id="analysis_date" name="analysis_date"
+                            class="w-full border rounded-lg p-2 mr-2">
+                        <form action="{{ url_for('phantich') }}" method="POST">
+                            <input type="hidden" name="analysis_date" id="hidden_analysis_date">
+                            <button type="submit" onclick="setHiddenDate()"
+                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">View
+                                Analysis</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div> -->
+
+        <nav class="flex flex-wrap gap-4 mb-8">
+            <a href="{{ url_for('index') }}"
+                class="btn-gradient text-white px-8 py-4 rounded-2xl font-medium shadow-lg flex items-center space-x-3 min-w-fit">
+                <span class="text-2xl">🏠</span>
+                <span>Home Dashboard</span>
             </a>
-        </div>
+            <a href="{{ url_for('phantich') }}"
+                class="btn-gradient text-white px-8 py-4 rounded-2xl font-medium shadow-lg flex items-center space-x-3 min-w-fit">
+                <span class="text-2xl">📊</span>
+                <span>Supplement Analytics</span>
+            </a>
+        </nav>
 
         <!-- Filter Section -->
         <div class="bg-white rounded-2xl shadow-2xl p-6 mb-8 card-hover animate-slide-up">
             <div class="flex items-center space-x-3 mb-6">
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div
+                    class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <span class="text-white text-sm">🔍</span>
                 </div>
                 <h2 class="text-xl font-semibold text-gray-800">Filter & Search</h2>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="space-y-2">
                     <label for="start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input id="start-date" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Select start date">
+                    <input id="start-date"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Select start date">
                 </div>
                 <div class="space-y-2">
                     <label for="end-date" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input id="end-date" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Select end date">
+                    <input id="end-date"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Select end date">
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm font-medium text-gray-700">Actions</label>
-                    <button id="filter-data" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105">
+                    <button id="filter-data"
+                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105">
                         Apply Filter
                     </button>
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm font-medium text-gray-700">&nbsp;</label>
-                    <button id="clear-filter" class="w-full bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all">
+                    <button id="clear-filter"
+                        class="w-full bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all">
                         Clear All
                     </button>
                 </div>
@@ -125,12 +194,13 @@
         <!-- Statistics Cards -->
         <div class="mb-8 animate-slide-up">
             <div class="flex items-center space-x-3 mb-6">
-                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                <div
+                    class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
                     <span class="text-white text-sm">📈</span>
                 </div>
                 <h2 class="text-xl font-semibold text-white">Summary Statistics</h2>
             </div>
-            
+
             <div id="stats" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <div class="bg-white rounded-2xl p-6 shadow-xl card-hover">
                     <div class="animate-pulse">
@@ -157,13 +227,14 @@
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
                 <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
                         <span class="text-white text-sm">📋</span>
                     </div>
                     <h2 class="text-xl font-semibold text-gray-800">Detailed Records</h2>
                 </div>
             </div>
-            
+
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-700 to-gray-800 text-white">
@@ -199,11 +270,11 @@
     </div>
 
     <script>
-        flatpickr("#start-date", { 
+        flatpickr("#start-date", {
             dateFormat: "Y-m-d",
             theme: "material_blue"
         });
-        flatpickr("#end-date", { 
+        flatpickr("#end-date", {
             dateFormat: "Y-m-d",
             theme: "material_blue"
         });
@@ -216,7 +287,7 @@
                 orange: "from-orange-500 to-orange-600",
                 red: "from-red-500 to-red-600"
             };
-            
+
             return `
                 <div class="bg-white rounded-2xl p-6 shadow-xl card-hover border-l-4 border-${color}-500">
                     <div class="flex items-center justify-between">
@@ -235,15 +306,15 @@
         function fetchHistoryData(startDate, endDate) {
             const tbody = $('#history-table');
             const statsDiv = $('#stats');
-            
+
             // Show loading state
             tbody.html('<tr><td colspan="13" class="px-4 py-12 text-center"><div class="flex flex-col items-center space-y-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div><span class="text-gray-500">Loading data...</span></div></td></tr>');
-            
+
             $.ajax({
                 url: '/get_history',
                 method: 'GET',
                 data: { start_date: startDate, end_date: endDate },
-                success: function(response) {
+                success: function (response) {
                     tbody.empty();
                     statsDiv.empty();
 
@@ -267,11 +338,11 @@
                     } else {
                         // Add data rows with alternating colors
                         response.data.forEach((row, index) => {
-                            const total = (row.beroca || 0) + (row.cachua || 0) + (row.cam || 0) + 
-                                        (row.egg || 0) + (row.maleutyl || 0) + (row.probio || 0) + 
-                                        (row.sui || 0) + (row.topralsin || 0) + (row.vitatrum || 0) + 
-                                        (row.zidocinDHG || 0);
-                            
+                            const total = (row.beroca || 0) + (row.cachua || 0) + (row.cam || 0) +
+                                (row.egg || 0) + (row.maleutyl || 0) + (row.probio || 0) +
+                                (row.sui || 0) + (row.topralsin || 0) + (row.vitatrum || 0) +
+                                (row.zidocinDHG || 0);
+
                             const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                             tbody.append(`
                                 <tr class="${rowClass} hover:bg-blue-50 transition-colors">
@@ -309,7 +380,7 @@
                         statsDiv.html(statCards.join(''));
                     }
                 },
-                error: function() {
+                error: function () {
                     tbody.html(`
                         <tr>
                             <td colspan="13" class="px-4 py-12 text-center">
@@ -330,21 +401,28 @@
             });
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             fetchHistoryData();
 
-            $('#filter-data').click(function() {
+            $('#filter-data').click(function () {
                 const startDate = $('#start-date').val();
                 const endDate = $('#end-date').val();
                 fetchHistoryData(startDate, endDate);
             });
 
-            $('#clear-filter').click(function() {
+            $('#clear-filter').click(function () {
                 $('#start-date').val('');
                 $('#end-date').val('');
                 fetchHistoryData();
             });
         });
+
+        function setHiddenDate() {
+            const analysisDate = $('#analysis_date').val();
+            $('#hidden_analysis_date').val(analysisDate);
+        }
     </script>
+
 </body>
+
 </html>
